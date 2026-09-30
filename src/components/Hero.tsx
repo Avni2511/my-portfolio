@@ -95,12 +95,12 @@ export const Hero: React.FC = () => {
                   return (
                     <span
                       key={`last-${index}`}
-                      className="inline-block italic font-light text-cyan-200/90 transition-all duration-500 transform hover:text-cyan-400 cursor-default"
+                      className="inline-block transition-all duration-500 transform hover:text-cyan-400 cursor-default text-white"
                       style={{
                         opacity: isVisible ? 1 : 0,
-                        transform: isVisible ? 'translateY(0) rotate(0deg)' : 'translateY(40px) rotate(-4deg)',
+                        transform: isVisible ? 'translateY(0) rotate(0deg)' : 'translateY(40px) rotate(4deg)',
                         transitionDelay: `${charIndex * 40}ms`,
-                        textShadow: isVisible ? '0 0 35px rgba(139, 92, 246, 0.5)' : 'none',
+                        textShadow: isVisible ? '0 0 30px rgba(0, 240, 255, 0.4)' : 'none',
                       }}
                     >
                       {char}
