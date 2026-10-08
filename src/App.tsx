@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
 import { SelectedWorks } from './components/SelectedWorks';
-import { TheCraft } from './components/TheCraft';
 import { ToolsOfAtelier } from './components/ToolsOfAtelier';
 import { TheJourney } from './components/TheJourney';
 import { TheMaker } from './components/TheMaker';
@@ -10,7 +9,6 @@ import { CurrentExperiments } from './components/CurrentExperiments';
 import { BeyondTheCode } from './components/BeyondTheCode';
 import { ContactSection } from './components/ContactSection';
 import { Footer } from './components/Footer';
-import { SystemStatusWidget } from './components/SystemStatusWidget';
 import { CaseStudyModal } from './components/CaseStudyModal';
 import { FloatingLettersCanvas } from './components/FloatingLettersCanvas';
 import { CustomCursor } from './components/CustomCursor';
@@ -67,33 +65,27 @@ export function App() {
         {/* 02: Selected Works (Atelier Catalogue) */}
         <SelectedWorks onSelectWork={setSelectedWork} />
 
-        {/* 03: The Craft (Engineering Process Flow) */}
-        <TheCraft />
-
-        {/* 04: Tools of the Atelier (Materials & Tech) */}
+        {/* 03: Tools of the Atelier (Materials & Tech) */}
         <ToolsOfAtelier />
 
-        {/* 05: The Journey (Exhibition Timeline) */}
+        {/* 04: The Journey (Exhibition Timeline) */}
         <TheJourney />
 
-        {/* 06: The Maker (About & Academic Foundation) */}
+        {/* 05: The Maker (About & Academic Foundation) */}
         <TheMaker />
 
-        {/* 07: Current Experiment (AI × Backend & RAG) */}
+        {/* 06: Current Experiment (AI × Backend & RAG) */}
         <CurrentExperiments />
 
-        {/* 08: Beyond the Code (Interests & Perspective) */}
+        {/* 07: Beyond the Code (Interests & Perspective) */}
         <BeyondTheCode />
 
-        {/* 09: Contact / Correspondence */}
+        {/* 08: Contact / Correspondence */}
         <ContactSection />
       </main>
 
       {/* Footer */}
       <Footer />
-
-      {/* Live Atelier Status Widget */}
-      <SystemStatusWidget />
 
       {/* Interactive Case Study Modal */}
       <CaseStudyModal

@@ -13,7 +13,7 @@ export const CurrentExperiments: React.FC = () => {
           <div>
             <div className="flex items-center gap-2 text-[10px] font-mono tracking-widest text-cyan-400 uppercase mb-3">
               <Brain size={14} className="text-cyan-400" />
-              <span>INDEX / 07 • CURRENT FOCUS</span>
+              <span>INDEX / 06 • CURRENT FOCUS</span>
             </div>
             <h2 className="font-editorial text-4xl sm:text-5xl md:text-6xl font-medium tracking-tight uppercase text-white">
               EXPLORING: AI & BACKEND

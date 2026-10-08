@@ -12,7 +12,7 @@ export const TheMaker: React.FC = () => {
           <div>
             <div className="flex items-center gap-2 text-[10px] font-mono tracking-widest text-cyan-400 uppercase mb-3">
               <User size={14} className="text-cyan-400" />
-              <span>INDEX / 06 • ABOUT ME</span>
+              <span>INDEX / 05 • ABOUT ME</span>
             </div>
             <h2 className="font-editorial text-4xl sm:text-5xl md:text-6xl font-medium tracking-tight uppercase text-white">
               MEET THE DEVELOPER
