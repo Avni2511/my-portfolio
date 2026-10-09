@@ -23,9 +23,7 @@ export const Navbar: React.FC<NavbarProps> = () => {
     { label: 'HOME', href: '#home' },
     { label: 'PROJECTS', href: '#projects' },
     { label: 'TECH STACK', href: '#skills' },
-    { label: 'JOURNEY', href: '#journey' },
     { label: 'ABOUT ME', href: '#about' },
-    { label: 'EXPLORING AI', href: '#ai' },
     { label: 'CONTACT', href: '#contact' },
   ];
 

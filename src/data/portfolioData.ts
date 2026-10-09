@@ -358,8 +358,8 @@ export const CRAFT_STAGES: CraftStage[] = [
 
 export const TOOLS_OF_ATELIER: ToolCategory[] = [
   {
-    title: "BACKEND DEVELOPMENT",
-    subtitle: "Core Programming & Frameworks",
+    title: "BACKEND ENGINEERING",
+    subtitle: "Core Languages & REST Frameworks",
     items: [
       { name: "Python", level: "primary", note: "Primary Language" },
       { name: "Django", level: "primary", note: "Backend Framework" },
@@ -368,49 +368,53 @@ export const TOOLS_OF_ATELIER: ToolCategory[] = [
     ]
   },
   {
-    title: "DATABASES",
-    subtitle: "Data Storage & Query Optimization",
+    title: "DATABASES & STORAGE",
+    subtitle: "Relational Schemas & Query Tuning",
     items: [
-      { name: "PostgreSQL", level: "primary", note: "Relational Database" },
-      { name: "SQL", level: "primary", note: "Queries & Indexing" }
+      { name: "PostgreSQL", level: "primary", note: "Relational DB" },
+      { name: "SQL", level: "primary", note: "Queries & Indexing" },
+      { name: "Database Normalization", level: "secondary", note: "Schema Design" },
+      { name: "ORM Query Optimization", level: "primary", note: "N+1 Elimination" }
     ]
   },
   {
     title: "CLOUD & DEVOPS",
-    subtitle: "Infrastructure & Containers",
+    subtitle: "Infrastructure as Code & Containers",
     items: [
       { name: "AWS", level: "primary", note: "VPC, EC2, ALB, SQS" },
-      { name: "Docker", level: "primary", note: "Containers" },
-      { name: "Terraform", level: "primary", note: "Infrastructure as Code" }
+      { name: "Docker & Compose", level: "primary", note: "Containerization" },
+      { name: "Terraform", level: "primary", note: "IaC Automation" },
+      { name: "CI / CD Pipelines", level: "secondary", note: "GitHub Actions" }
     ]
   },
   {
-    title: "SYSTEMS & CACHING",
-    subtitle: "Asynchronous Tasks & Protocols",
+    title: "SYSTEMS, CACHING & ASYNC",
+    subtitle: "Concurrency & Distributed Flow",
     items: [
-      { name: "Redis", level: "primary", note: "Caching & Queues" },
-      { name: "Celery", level: "primary", note: "Background Tasks" },
-      { name: "REST APIs", level: "primary", note: "API Architecture" },
-      { name: "JWT Authentication", level: "primary", note: "Token Security" },
-      { name: "Caching Layers", level: "secondary", note: "Query Caching" }
+      { name: "Redis", level: "primary", note: "In-Memory Caching" },
+      { name: "Celery", level: "primary", note: "Background Task Queue" },
+      { name: "JWT Authentication", level: "primary", note: "RBAC & Security" },
+      { name: "Rate Limiting & Token Bucket", level: "secondary", note: "Traffic Control" }
     ]
   },
   {
-    title: "DEVELOPER TOOLS",
-    subtitle: "Version Control & Testing",
+    title: "AI & INTELLIGENT SYSTEMS",
+    subtitle: "RAG & LLM Backend Integration",
     items: [
-      { name: "Git", level: "primary", note: "Version Control" },
-      { name: "GitHub", level: "primary", note: "CI/CD & Code" },
-      { name: "Postman", level: "primary", note: "API Testing" },
-      { name: "CI / CD Pipelines", level: "secondary", note: "Automated Testing" }
+      { name: "RAG Architecture", level: "primary", note: "Context Retrieval" },
+      { name: "Vector Embeddings & Search", level: "primary", note: "Semantic Search" },
+      { name: "LLM & AI API Integration", level: "primary", note: "Intelligent APIs" },
+      { name: "Async AI Task Pipelines", level: "secondary", note: "Non-Blocking Jobs" }
     ]
   },
   {
-    title: "PROBLEM SOLVING",
-    subtitle: "Data Structures & Algorithmic Foundations",
+    title: "PROBLEM SOLVING & CS CORE",
+    subtitle: "Algorithms & Low-Level Foundations",
     items: [
       { name: "C++", level: "primary", note: "Core Language" },
-      { name: "Data Structures & Algorithms", level: "primary", note: "Problem Solving" }
+      { name: "Data Structures & Algorithms", level: "primary", note: "Optimization" },
+      { name: "Git & GitHub", level: "primary", note: "Version Control" },
+      { name: "Postman", level: "secondary", note: "API Testing" }
     ]
   }
 ];

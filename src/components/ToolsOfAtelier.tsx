@@ -19,7 +19,7 @@ export const ToolsOfAtelier: React.FC = () => {
           </div>
 
           <p className="mt-4 md:mt-0 text-xs md:text-sm font-light text-slate-300 max-w-md text-left md:text-right font-sans">
-            Programming languages, backend frameworks, databases, and cloud tools I work with to build scalable applications.
+            Backend engineering, relational databases, cloud infrastructure, asynchronous architectures, and AI/RAG integration systems.
           </p>
         </div>
 

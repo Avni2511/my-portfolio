@@ -17,7 +17,7 @@ export const ContactSection: React.FC = () => {
         {/* Section Label */}
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-cyan-950/40 border border-cyan-500/30 text-cyan-300 text-[10px] font-mono tracking-widest-xl uppercase mb-8 shadow-[0_0_15px_rgba(0,240,255,0.15)] rounded-sm">
           <MessageSquare size={12} className="text-cyan-400" />
-          <span>INDEX / 08 • GET IN TOUCH</span>
+          <span>INDEX / 06 • GET IN TOUCH</span>
         </div>
 
         {/* Big Heading */}

@@ -11,7 +11,7 @@ export const BeyondTheCode: React.FC = () => {
           <div>
             <div className="flex items-center gap-2 text-[10px] font-mono tracking-widest text-cyan-400 uppercase mb-3">
               <Sparkles size={14} className="text-cyan-400" />
-              <span>INDEX / 07 • HUMANITY & PERSPECTIVE</span>
+              <span>INDEX / 05 • HUMANITY & PERSPECTIVE</span>
             </div>
             <h2 className="font-editorial text-4xl sm:text-5xl md:text-6xl font-medium tracking-tight uppercase text-white">
               BEYOND THE CODE

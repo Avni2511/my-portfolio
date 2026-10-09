@@ -234,9 +234,9 @@ export const Hero: React.FC = () => {
           <div className="flex items-center gap-6">
             <span className="text-cyan-300">[ 01 ] FEATURED PROJECTS</span>
             <span className="hidden sm:inline opacity-30">•</span>
-            <span className="hidden sm:inline">[ 02 ] TECH STACK</span>
+            <span className="hidden sm:inline">[ 02 ] SKILLS & TECH STACK</span>
             <span className="hidden sm:inline opacity-30">•</span>
-            <span className="hidden sm:inline">[ 03 ] AI EXPLORATION</span>
+            <span className="hidden sm:inline">[ 03 ] ABOUT ME</span>
           </div>
           <div className="flex items-center gap-2 text-cyan-400 font-bold">
             <span>SCROLL TO EXPLORE</span>

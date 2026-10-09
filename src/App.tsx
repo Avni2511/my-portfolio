@@ -3,9 +3,7 @@ import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
 import { SelectedWorks } from './components/SelectedWorks';
 import { ToolsOfAtelier } from './components/ToolsOfAtelier';
-import { TheJourney } from './components/TheJourney';
 import { TheMaker } from './components/TheMaker';
-import { CurrentExperiments } from './components/CurrentExperiments';
 import { BeyondTheCode } from './components/BeyondTheCode';
 import { ContactSection } from './components/ContactSection';
 import { Footer } from './components/Footer';
@@ -65,22 +63,16 @@ export function App() {
         {/* 02: Selected Works (Atelier Catalogue) */}
         <SelectedWorks onSelectWork={setSelectedWork} />
 
-        {/* 03: Tools of the Atelier (Materials & Tech) */}
+        {/* 03: Tools of the Atelier (Materials & Tech Stack including AI) */}
         <ToolsOfAtelier />
 
-        {/* 04: The Journey (Exhibition Timeline) */}
-        <TheJourney />
-
-        {/* 05: The Maker (About & Academic Foundation) */}
+        {/* 04: The Maker (About & Academic Foundation) */}
         <TheMaker />
 
-        {/* 06: Current Experiment (AI × Backend & RAG) */}
-        <CurrentExperiments />
-
-        {/* 07: Beyond the Code (Interests & Perspective) */}
+        {/* 05: Beyond the Code (Interests & Perspective) */}
         <BeyondTheCode />
 
-        {/* 08: Contact / Correspondence */}
+        {/* 06: Contact / Correspondence */}
         <ContactSection />
       </main>
 
