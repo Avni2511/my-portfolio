@@ -3,30 +3,34 @@ import React, { useEffect, useRef } from 'react';
 interface Star {
   x: number;
   y: number;
+  z: number;
   radius: number;
   alpha: number;
   speedAlpha: number;
 }
 
-interface CosmicLetter {
-  char: string;
+interface FloatingSkill {
+  name: string;
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  color: string;
+  glow: string;
+  size: number;
+  type: 'tech' | 'glyph';
+}
+
+interface ThrusterParticle {
   x: number;
   y: number;
   vx: number;
   vy: number;
   size: number;
-  opacity: number;
+  alpha: number;
   color: string;
-  glow: string;
-}
-
-interface ShootingStar {
-  x: number;
-  y: number;
-  length: number;
-  speed: number;
-  angle: number;
-  opacity: number;
+  life: number;
+  maxLife: number;
 }
 
 export const FloatingLettersCanvas: React.FC = () => {
@@ -49,143 +53,294 @@ export const FloatingLettersCanvas: React.FC = () => {
     };
     window.addEventListener('resize', handleResize);
 
-    // 1. Starfield
-    const stars: Star[] = Array.from({ length: 140 }, () => ({
-      x: Math.random() * width,
-      y: Math.random() * height,
-      radius: Math.random() * 1.5 + 0.3,
-      alpha: Math.random() * 0.8 + 0.2,
-      speedAlpha: (Math.random() * 0.02 + 0.005) * (Math.random() > 0.5 ? 1 : -1),
-    }));
+    // Rocket Boost state
+    let isBoosting = false;
+    let boostIntensity = 0; // 0 to 1
+    const particles: ThrusterParticle[] = [];
 
-    // 2. Cosmic Floating Letters & Starlight Glyphs
-    const chars = [
-      'A', 'V', 'N', 'I', 'G', 'U', 'P', 'T', 'A',
-      '✦', '★', '✧', '◈', '01', '02', '03', '04',
-      'DJANGO', 'POSTGRESQL', 'REDIS', 'CELERY', 'AWS', 'TERRAFORM', 'ORBIT', 'COSMOS', 'DOCKER'
-    ];
-
-    const colors = [
-      { color: 'rgba(0, 240, 255, 0.4)', glow: 'rgba(0, 240, 255, 0.6)' },
-      { color: 'rgba(139, 92, 246, 0.4)', glow: 'rgba(139, 92, 246, 0.6)' },
-      { color: 'rgba(245, 158, 11, 0.4)', glow: 'rgba(245, 158, 11, 0.6)' },
-      { color: 'rgba(240, 244, 252, 0.3)', glow: 'rgba(255, 255, 255, 0.5)' },
-    ];
-
-    const letters: CosmicLetter[] = Array.from({ length: 28 }, () => {
-      const c = colors[Math.floor(Math.random() * colors.length)];
-      return {
-        char: chars[Math.floor(Math.random() * chars.length)],
-        x: Math.random() * width,
-        y: Math.random() * height,
-        vx: (Math.random() - 0.5) * 0.35,
-        vy: (Math.random() - 0.5) * 0.35 - 0.05,
-        size: Math.random() > 0.7 ? Math.floor(Math.random() * 32 + 22) : Math.floor(Math.random() * 16 + 10),
-        opacity: Math.random() * 0.5 + 0.3,
-        color: c.color,
-        glow: c.glow,
-      };
-    });
-
-    // 3. Shooting stars
-    const shootingStars: ShootingStar[] = [];
-    const createShootingStar = () => {
-      shootingStars.push({
-        x: Math.random() * width,
-        y: Math.random() * (height * 0.5),
-        length: Math.random() * 80 + 40,
-        speed: Math.random() * 10 + 12,
-        angle: (Math.PI / 4) + (Math.random() * 0.2 - 0.1),
-        opacity: 1,
-      });
+    const handleRocketBoost = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      isBoosting = !!customEvent.detail?.boosting;
     };
+    window.addEventListener('rocket-boost', handleRocketBoost);
 
-    let shootingStarTimer = setInterval(() => {
-      if (Math.random() > 0.4) createShootingStar();
-    }, 3500);
-
+    // Mouse coordinates
     let mouseX = width / 2;
     let mouseY = height / 2;
+    let isMouseOver = false;
+
     const handleMouseMove = (e: MouseEvent) => {
       mouseX = e.clientX;
       mouseY = e.clientY;
+      isMouseOver = true;
+    };
+    const handleMouseLeave = () => {
+      isMouseOver = false;
     };
     window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseleave', handleMouseLeave);
+
+    // 1. Warp-capable 3D Starfield
+    const STAR_COUNT = 110;
+    const stars: Star[] = Array.from({ length: STAR_COUNT }, () => ({
+      x: Math.random() * width,
+      y: Math.random() * height,
+      z: Math.random() * 1000 + 1,
+      radius: Math.random() * 1.4 + 0.4,
+      alpha: Math.random() * 0.6 + 0.2,
+      speedAlpha: (Math.random() * 0.01 + 0.003) * (Math.random() > 0.5 ? 1 : -1),
+    }));
+
+    // 2. High-Tech Floating Skills & Glyphs with Anti-Cluster Spacing
+    const SKILLS_LIST = [
+      'DJANGO', 'PYTHON', 'POSTGRESQL', 'REDIS',
+      'CELERY', 'AWS', 'DOCKER', 'TERRAFORM',
+      'FASTAPI', 'AI • RAG', 'REST API', 'C++',
+      'SQL', 'JWT AUTH', '✦', '✧', '◈', '🪐'
+    ];
+
+    const PALETTES = [
+      { color: '#00F0FF', glow: 'rgba(0, 240, 255, 0.45)' }, // Cyan
+      { color: '#A78BFA', glow: 'rgba(167, 139, 250, 0.45)' }, // Purple
+      { color: '#38BDF8', glow: 'rgba(56, 189, 248, 0.45)' }, // Sky
+      { color: '#34D399', glow: 'rgba(52, 211, 153, 0.45)' }, // Emerald
+      { color: '#FCD34D', glow: 'rgba(252, 211, 77, 0.45)' }, // Gold
+    ];
+
+    // Distribute skills across screen sectors to prevent any clustering on spawn
+    const cols = 5;
+    const rows = 4;
+    const colWidth = width / cols;
+    const rowHeight = height / rows;
+
+    const floatingItems: FloatingSkill[] = SKILLS_LIST.map((name, i) => {
+      const palette = PALETTES[i % PALETTES.length];
+      const isGlyph = ['✦', '✧', '◈', '🪐'].includes(name);
+      const col = i % cols;
+      const row = Math.floor(i / cols) % rows;
+
+      return {
+        name,
+        type: isGlyph ? 'glyph' : 'tech',
+        x: col * colWidth + Math.random() * (colWidth * 0.7) + 30,
+        y: row * rowHeight + Math.random() * (rowHeight * 0.7) + 40,
+        vx: (Math.random() - 0.5) * 0.35,
+        vy: (Math.random() - 0.5) * 0.35 - 0.06,
+        color: palette.color,
+        glow: palette.glow,
+        size: isGlyph ? 18 : 11,
+      };
+    });
 
     const render = () => {
       ctx.clearRect(0, 0, width, height);
 
-      // Draw Twinkling Starfield
+      // Smooth boost intensity transition
+      if (isBoosting) {
+        boostIntensity = Math.min(1, boostIntensity + 0.08);
+      } else {
+        boostIntensity = Math.max(0, boostIntensity - 0.03);
+      }
+
+      // 1. Draw Starfield (Transforms into Warp Speed Streaks during Rocket Boost!)
       stars.forEach((star) => {
-        star.alpha += star.speedAlpha;
-        if (star.alpha <= 0.1 || star.alpha >= 0.9) {
-          star.speedAlpha = -star.speedAlpha;
+        if (boostIntensity > 0.05) {
+          // Warp Speed Streak Mode
+          const streakLength = 25 + boostIntensity * 120;
+          const streakSpeed = 8 + boostIntensity * 32;
+          star.y += streakSpeed;
+          if (star.y > height) {
+            star.y = 0;
+            star.x = Math.random() * width;
+          }
+
+          ctx.save();
+          const gradient = ctx.createLinearGradient(star.x, star.y - streakLength, star.x, star.y);
+          gradient.addColorStop(0, 'transparent');
+          gradient.addColorStop(0.7, `rgba(0, 240, 255, ${0.4 * boostIntensity})`);
+          gradient.addColorStop(1, `rgba(255, 255, 255, ${0.9 * boostIntensity})`);
+          ctx.strokeStyle = gradient;
+          ctx.lineWidth = star.radius * (1 + boostIntensity);
+          ctx.beginPath();
+          ctx.moveTo(star.x, star.y - streakLength);
+          ctx.lineTo(star.x, star.y);
+          ctx.stroke();
+          ctx.restore();
+        } else {
+          // Normal Gentle Star Twinkle
+          star.alpha += star.speedAlpha;
+          if (star.alpha <= 0.1 || star.alpha >= 0.8) {
+            star.speedAlpha = -star.speedAlpha;
+          }
+          ctx.beginPath();
+          ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(180, 220, 255, ${star.alpha})`;
+          ctx.fill();
         }
-        ctx.beginPath();
-        ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(200, 230, 255, ${star.alpha})`;
-        ctx.fill();
       });
 
-      // Draw Shooting Stars
-      for (let i = shootingStars.length - 1; i >= 0; i--) {
-        const ss = shootingStars[i];
-        ss.x += Math.cos(ss.angle) * ss.speed;
-        ss.y += Math.sin(ss.angle) * ss.speed;
-        ss.opacity -= 0.02;
+      // 2. Spawn Rocket Flame Exhaust Particles when Boosting
+      if (boostIntensity > 0.1) {
+        for (let p = 0; p < 4; p++) {
+          const pColors = ['#FF4500', '#FFA500', '#FFD700', '#00F0FF', '#FFFFFF'];
+          particles.push({
+            x: width * 0.85 + (Math.random() - 0.5) * 30, // Positioned near rocket
+            y: height - 60 + Math.random() * 20,
+            vx: (Math.random() - 0.5) * 4,
+            vy: Math.random() * 12 + 6,
+            size: Math.random() * 8 + 3,
+            alpha: 1,
+            color: pColors[Math.floor(Math.random() * pColors.length)],
+            life: 0,
+            maxLife: Math.random() * 30 + 20,
+          });
+        }
+      }
 
-        if (ss.opacity <= 0 || ss.x > width || ss.y > height) {
-          shootingStars.splice(i, 1);
+      // Draw & Update Thruster Particles
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.life++;
+        p.alpha = 1 - p.life / p.maxLife;
+
+        if (p.life >= p.maxLife) {
+          particles.splice(i, 1);
           continue;
         }
 
         ctx.save();
-        const gradient = ctx.createLinearGradient(
-          ss.x, ss.y,
-          ss.x - Math.cos(ss.angle) * ss.length,
-          ss.y - Math.sin(ss.angle) * ss.length
-        );
-        gradient.addColorStop(0, `rgba(0, 240, 255, ${ss.opacity})`);
-        gradient.addColorStop(1, 'rgba(0, 240, 255, 0)');
-
-        ctx.strokeStyle = gradient;
-        ctx.lineWidth = 1.5;
         ctx.beginPath();
-        ctx.moveTo(ss.x, ss.y);
-        ctx.lineTo(
-          ss.x - Math.cos(ss.angle) * ss.length,
-          ss.y - Math.sin(ss.angle) * ss.length
-        );
-        ctx.stroke();
+        ctx.arc(p.x, p.y, p.size * (1 - p.life / p.maxLife), 0, Math.PI * 2);
+        ctx.fillStyle = p.color;
+        ctx.shadowColor = p.color;
+        ctx.shadowBlur = 12;
+        ctx.globalAlpha = p.alpha;
+        ctx.fill();
         ctx.restore();
       }
 
-      // Draw Floating Cosmic Letters & Celestial Glyphs
-      letters.forEach((letter) => {
-        letter.x += letter.vx;
-        letter.y += letter.vy;
+      // 3. Anti-Clustering Physics for Floating Skills
+      for (let i = 0; i < floatingItems.length; i++) {
+        for (let j = i + 1; j < floatingItems.length; j++) {
+          const itemA = floatingItems[i];
+          const itemB = floatingItems[j];
+          const dx = itemB.x - itemA.x;
+          const dy = itemB.y - itemA.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          const minSafeDist = 130; // Minimum distance to prevent clustering!
 
-        // Mouse Gravitational Deflection
-        const dx = letter.x - mouseX;
-        const dy = letter.y - mouseY;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < 160) {
-          const force = (160 - dist) / 160;
-          letter.x += (dx / dist) * force * 1.5;
-          letter.y += (dy / dist) * force * 1.5;
+          if (dist < minSafeDist && dist > 0) {
+            // Smooth repulsion push
+            const overlap = (minSafeDist - dist) / minSafeDist;
+            const pushX = (dx / dist) * overlap * 0.4;
+            const pushY = (dy / dist) * overlap * 0.4;
+            itemA.x -= pushX;
+            itemA.y -= pushY;
+            itemB.x += pushX;
+            itemB.y += pushY;
+          }
+        }
+      }
+
+      // 4. Interactive Constellation Lines (Connects cursor to nearby skills)
+      if (isMouseOver && boostIntensity < 0.2) {
+        floatingItems.forEach((item) => {
+          const dx = mouseX - item.x;
+          const dy = mouseY - item.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+
+          if (dist < 180) {
+            ctx.save();
+            ctx.strokeStyle = `rgba(0, 240, 255, ${0.35 * (1 - dist / 180)})`;
+            ctx.lineWidth = 1;
+            ctx.setLineDash([3, 4]);
+            ctx.beginPath();
+            ctx.moveTo(item.x, item.y);
+            ctx.lineTo(mouseX, mouseY);
+            ctx.stroke();
+            ctx.restore();
+          }
+        });
+      }
+
+      // 5. Draw Floating Skills with Clean Futuristic Capsules
+      floatingItems.forEach((item) => {
+        // Accelerate downwards if rocket is blasting off
+        if (boostIntensity > 0.05) {
+          item.y += 4 + boostIntensity * 16;
+        } else {
+          item.x += item.vx;
+          item.y += item.vy;
         }
 
-        if (letter.x < -100) letter.x = width + 100;
-        if (letter.x > width + 100) letter.x = -100;
-        if (letter.y < -100) letter.y = height + 100;
-        if (letter.y > height + 100) letter.y = -100;
+        // Mouse Gravitational Deflection
+        if (isMouseOver && boostIntensity < 0.2) {
+          const dx = item.x - mouseX;
+          const dy = item.y - mouseY;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 140) {
+            const force = (140 - dist) / 140;
+            item.x += (dx / dist) * force * 1.8;
+            item.y += (dy / dist) * force * 1.8;
+          }
+        }
+
+        // Boundary wrap
+        if (item.x < -80) item.x = width + 80;
+        if (item.x > width + 80) item.x = -80;
+        if (item.y < -50) item.y = height + 50;
+        if (item.y > height + 50) item.y = -50;
 
         ctx.save();
-        ctx.font = `${letter.size}px "JetBrains Mono", "Playfair Display", monospace`;
-        ctx.fillStyle = letter.color;
-        ctx.shadowColor = letter.glow;
-        ctx.shadowBlur = 8;
-        ctx.fillText(letter.char, letter.x, letter.y);
+
+        if (item.type === 'glyph') {
+          // Render cosmic star/planet glyph
+          ctx.font = `${item.size}px "Playfair Display", serif`;
+          ctx.fillStyle = item.color;
+          ctx.shadowColor = item.glow;
+          ctx.shadowBlur = 10;
+          ctx.globalAlpha = 0.6 + boostIntensity * 0.3;
+          ctx.fillText(item.name, item.x, item.y);
+        } else {
+          // Render Clean Orbital Tech Capsule Pill
+          ctx.font = `600 ${item.size}px "JetBrains Mono", monospace`;
+          const textMetrics = ctx.measureText(item.name);
+          const textWidth = textMetrics.width;
+          const padX = 10;
+          const padY = 5;
+          const capsuleW = textWidth + padX * 2;
+          const capsuleH = item.size + padY * 2;
+          const rx = item.x - capsuleW / 2;
+          const ry = item.y - capsuleH / 2;
+
+          // Capsule background
+          ctx.fillStyle = 'rgba(7, 10, 18, 0.65)';
+          ctx.strokeStyle = item.color;
+          ctx.lineWidth = 1;
+          ctx.shadowColor = item.glow;
+          ctx.shadowBlur = 8;
+          ctx.globalAlpha = 0.75 + boostIntensity * 0.2;
+
+          // Draw rounded capsule
+          ctx.beginPath();
+          ctx.roundRect(rx, ry, capsuleW, capsuleH, 6);
+          ctx.fill();
+          ctx.stroke();
+
+          // Capsule dot
+          ctx.beginPath();
+          ctx.arc(rx + 7, ry + capsuleH / 2, 2, 0, Math.PI * 2);
+          ctx.fillStyle = item.color;
+          ctx.fill();
+
+          // Capsule text
+          ctx.fillStyle = '#FFFFFF';
+          ctx.shadowBlur = 4;
+          ctx.fillText(item.name, rx + 14, ry + capsuleH / 2 + item.size / 3);
+        }
+
         ctx.restore();
       });
 
@@ -197,7 +352,8 @@ export const FloatingLettersCanvas: React.FC = () => {
     return () => {
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('mousemove', handleMouseMove);
-      clearInterval(shootingStarTimer);
+      window.removeEventListener('mouseleave', handleMouseLeave);
+      window.removeEventListener('rocket-boost', handleRocketBoost);
       cancelAnimationFrame(animationFrameId);
     };
   }, []);
@@ -205,7 +361,7 @@ export const FloatingLettersCanvas: React.FC = () => {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 pointer-events-none z-10 opacity-80"
+      className="fixed inset-0 pointer-events-none z-10"
       aria-hidden="true"
     />
   );

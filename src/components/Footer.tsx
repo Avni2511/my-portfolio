@@ -3,7 +3,15 @@ import { ArrowUp, Orbit } from 'lucide-react';
 
 export const Footer: React.FC = () => {
   const scrollToTop = () => {
+    window.dispatchEvent(
+      new CustomEvent('rocket-boost', { detail: { boosting: true } })
+    );
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    setTimeout(() => {
+      window.dispatchEvent(
+        new CustomEvent('rocket-boost', { detail: { boosting: false } })
+      );
+    }, 2200);
   };
 
   return (

@@ -10,6 +10,7 @@ import { Footer } from './components/Footer';
 import { CaseStudyModal } from './components/CaseStudyModal';
 import { FloatingLettersCanvas } from './components/FloatingLettersCanvas';
 import { CustomCursor } from './components/CustomCursor';
+import { RocketBooster } from './components/RocketBooster';
 import { CaseStudy } from './types';
 import { SELECTED_WORKS } from './data/portfolioData';
 
@@ -78,6 +79,9 @@ export function App() {
 
       {/* Footer */}
       <Footer />
+
+      {/* Interactive Rocket Booster Thruster */}
+      <RocketBooster />
 
       {/* Interactive Case Study Modal */}
       <CaseStudyModal

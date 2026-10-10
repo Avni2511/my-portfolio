@@ -30,9 +30,9 @@ export const Navbar: React.FC<NavbarProps> = () => {
   return (
     <>
       <header
-        className={`fixed top-0 left-0 right-0 z-40 transition-all duration-500 ${
+        className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
           scrolled
-            ? 'py-3 backdrop-blur-xl bg-[#040508]/85 border-b border-cyan-500/15 shadow-[0_4px_30px_rgba(0,0,0,0.8)]'
+            ? 'py-3.5 backdrop-blur-xl bg-[#040508]/85 border-b border-white/10 shadow-lg'
             : 'py-6 bg-transparent'
         }`}
       >
@@ -42,44 +42,43 @@ export const Navbar: React.FC<NavbarProps> = () => {
             href="#home"
             className="group flex items-center gap-3 text-left focus:outline-none"
           >
-            <div className="w-8 h-8 border border-cyan-400/40 bg-cyan-950/30 flex items-center justify-center text-xs font-mono font-bold tracking-tighter text-cyan-300 group-hover:border-cyan-400 group-hover:shadow-[0_0_15px_rgba(0,240,255,0.4)] transition-all">
+            <div className="w-8 h-8 rounded-lg border border-white/10 bg-cyan-950/30 flex items-center justify-center text-xs font-mono font-bold text-cyan-300 group-hover:border-cyan-400/50 transition-all">
               ✦
             </div>
             <div className="flex flex-col">
-              <span className="font-serif tracking-widest-xl text-xs md:text-sm uppercase font-semibold text-white group-hover:text-cyan-300 transition-colors">
+              <span className="font-editorial text-sm tracking-wider uppercase font-semibold text-white group-hover:text-cyan-300 transition-colors">
                 AVNI GUPTA
               </span>
-              <span className="font-mono text-[9px] tracking-widest uppercase text-cyan-400/70">
+              <span className="font-mono text-[9px] tracking-wider uppercase text-slate-400">
                 SOFTWARE ENGINEER
               </span>
             </div>
           </a>
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden lg:flex items-center gap-7 text-[11px] font-mono tracking-widest text-slate-300">
+          <nav className="hidden lg:flex items-center gap-8 text-xs font-mono tracking-wider text-slate-300">
             {navLinks.map((link) => (
               <a
                 key={link.label}
                 href={link.href}
-                className="relative py-1 uppercase hover:text-cyan-300 transition-colors duration-200 group flex items-center gap-1"
+                className="py-1 uppercase hover:text-cyan-300 transition-colors duration-200"
               >
-                <span>{link.label}</span>
-                <span className="w-1 h-1 rounded-full bg-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                {link.label}
               </a>
             ))}
           </nav>
 
           {/* Right Status Badge */}
-          <div className="flex items-center gap-4">
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1 text-[10px] font-mono border rounded-none border-cyan-500/30 bg-cyan-950/20 text-cyan-200">
-              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping"></span>
-              <span>JHANSI, INDIA</span>
+          <div className="flex items-center gap-3">
+            <div className="hidden sm:flex items-center gap-2 px-3 py-1 text-[11px] font-mono rounded-full border border-white/10 bg-white/[0.03] text-slate-300">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+              <span>Jhansi, India</span>
             </div>
 
             {/* Mobile Menu Toggle */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 border border-cyan-500/30 text-cyan-300 hover:text-white transition-colors"
+              className="lg:hidden p-2 rounded-lg border border-white/10 text-slate-300 hover:text-white transition-colors"
               aria-label="Toggle Menu"
             >
               {mobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
