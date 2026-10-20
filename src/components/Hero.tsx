@@ -30,22 +30,17 @@ export const Hero: React.FC = () => {
       <div className="absolute top-1/2 -right-32 w-[450px] h-[450px] bg-purple-600/10 rounded-full blur-[160px] pointer-events-none"></div>
 
       {/* Top Status Bar */}
-      <div className="max-w-7xl mx-auto px-6 md:px-12 w-full flex items-center justify-between text-xs font-mono tracking-wider text-slate-400 mb-8 z-20">
-        <div className="flex items-center gap-2.5">
+      <div className="max-w-7xl mx-auto px-6 md:px-12 w-full flex items-center text-xs font-mono tracking-wider text-slate-400 mb-8 z-20">
+        <div data-floating-avoid="true" className="flex items-center gap-2.5">
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
           <span className="text-emerald-400 font-medium">AVAILABLE FOR ROLES</span>
-        </div>
-        <div className="hidden sm:flex items-center gap-3 text-slate-400 text-[11px]">
-          <span>KIET GROUP OF INSTITUTIONS (8.5 CGPA)</span>
-          <span className="opacity-40">•</span>
-          <span>JHANSI, INDIA</span>
         </div>
       </div>
 
       {/* Main Content Grid */}
       <div className="max-w-7xl mx-auto px-6 md:px-12 w-full grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-14 items-center my-auto z-20">
         {/* Left Column: Heading, Bio, CTAs */}
-        <div className="lg:col-span-7 flex flex-col justify-center text-left">
+        <div data-floating-avoid="true" className="lg:col-span-7 flex flex-col justify-center text-left">
           {/* Subtle Role Badge */}
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-950/40 border border-cyan-500/20 text-cyan-300 text-xs font-mono tracking-wider mb-6 w-fit">
             <Code2 size={13} className="text-cyan-400" />
@@ -138,7 +133,7 @@ export const Hero: React.FC = () => {
         </div>
 
         {/* Right Column: Clean, Elegant Portrait Card */}
-        <div className="lg:col-span-5 flex flex-col items-center lg:items-end">
+        <div data-floating-avoid="true" className="lg:col-span-5 flex flex-col items-center lg:items-end">
           <div className="relative w-full max-w-sm">
             {/* Elegant Framed Card */}
             <div className="relative p-2.5 rounded-2xl border border-white/10 bg-[#070912]/80 backdrop-blur-xl shadow-2xl transition-all duration-500 hover:border-cyan-500/30">
@@ -170,7 +165,7 @@ export const Hero: React.FC = () => {
       </div>
 
       {/* Subtle Bottom Scroll Hint */}
-      <div className="max-w-7xl mx-auto px-6 md:px-12 w-full pt-8 z-20">
+      <div data-floating-avoid="true" className="max-w-7xl mx-auto px-6 md:px-12 w-full pt-8 z-20">
         <div className="flex items-center justify-between py-3 border-t border-white/5 text-[11px] font-mono text-slate-400">
           <span className="tracking-wide">SELECTED WORKS & ARCHITECTURE</span>
           <a href="#projects" className="flex items-center gap-1.5 text-cyan-400 hover:text-cyan-300 transition-colors">

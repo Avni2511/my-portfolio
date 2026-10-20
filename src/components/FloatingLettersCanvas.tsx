@@ -15,6 +15,10 @@ interface FloatingSkill {
   y: number;
   vx: number;
   vy: number;
+  baseSpeed: number;
+  wobbleSpeed: number;
+  wobbleAmp: number;
+  phase: number;
   color: string;
   glow: string;
   size: number;
@@ -33,6 +37,17 @@ interface ThrusterParticle {
   maxLife: number;
 }
 
+interface ExclusionZone {
+  left: number;
+  top: number;
+  right: number;
+  bottom: number;
+  cx: number;
+  cy: number;
+  hw: number;
+  hh: number;
+}
+
 export const FloatingLettersCanvas: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -46,12 +61,103 @@ export const FloatingLettersCanvas: React.FC = () => {
     let width = (canvas.width = window.innerWidth);
     let height = (canvas.height = window.innerHeight);
 
+    // Track text exclusion zones so floating skills NEVER overlap with text
+    let exclusionZones: ExclusionZone[] = [];
+
+    const createZone = (left: number, top: number, right: number, bottom: number): ExclusionZone => ({
+      left,
+      top,
+      right,
+      bottom,
+      cx: (left + right) / 2,
+      cy: (top + bottom) / 2,
+      hw: (right - left) / 2,
+      hh: (bottom - top) / 2,
+    });
+
+    const updateExclusionZones = () => {
+      const zones: ExclusionZone[] = [];
+
+      // 1. Top Header / Navbar (full width safe banner)
+      const header = document.querySelector('header');
+      if (header) {
+        const hr = header.getBoundingClientRect();
+        if (hr.bottom > 0 && hr.top < height) {
+          zones.push(createZone(-20, 0, width + 20, Math.max(hr.bottom, 75) + 15));
+        }
+      }
+
+      // 2. Hero Section: Unified Protected Text Sanctuary (zero gap for skills to squeeze into)
+      const heroSection = document.getElementById('home');
+      if (heroSection) {
+        const heroRect = heroSection.getBoundingClientRect();
+        if (heroRect.bottom > 0 && heroRect.top < height) {
+          const statusBar = heroSection.querySelector('[data-floating-avoid="true"]');
+          const leftCol = heroSection.querySelector('.lg\\:col-span-7');
+          const rightCol = heroSection.querySelector('.lg\\:col-span-5');
+
+          // Full top status bar protection (covers AVAILABLE FOR ROLES and KIET GROUP / JHANSI)
+          if (statusBar) {
+            const sr = statusBar.getBoundingClientRect();
+            zones.push(createZone(sr.left - 25, sr.top - 18, sr.right + 25, sr.bottom + 18));
+          }
+
+          if (leftCol) {
+            const lr = leftCol.getBoundingClientRect();
+            // Start from status bar top to encompass ALL hero text, bio, pills, and CTAs without cracks
+            const statusTop = statusBar ? statusBar.getBoundingClientRect().top : lr.top - 50;
+            const topY = Math.min(statusTop, lr.top) - 15;
+            const bottomY = lr.bottom + 25;
+            const leftX = lr.left - 25;
+            const rightX = lr.right + 30;
+            zones.push(createZone(leftX, topY, rightX, bottomY));
+          }
+
+          if (rightCol) {
+            const rr = rightCol.getBoundingClientRect();
+            zones.push(createZone(rr.left - 20, rr.top - 20, rr.right + 20, rr.bottom + 20));
+          }
+        }
+      }
+
+      // 3. Subsequent section headings & cards across the page
+      const otherCards = document.querySelectorAll(
+        '#projects .group, #skills .cosmic-card, #about .cosmic-card, #contact form, h1, h2'
+      );
+      otherCards.forEach((el) => {
+        const r = el.getBoundingClientRect();
+        if (
+          r.bottom > 0 &&
+          r.top < height &&
+          r.right > 0 &&
+          r.left < width &&
+          r.width > 30 &&
+          r.height > 30
+        ) {
+          zones.push(createZone(r.left - 25, r.top - 20, r.right + 25, r.bottom + 20));
+        }
+      });
+
+      exclusionZones = zones;
+    };
+
     const handleResize = () => {
       if (!canvas) return;
       width = canvas.width = window.innerWidth;
       height = canvas.height = window.innerHeight;
+      updateExclusionZones();
     };
+
+    const handleScroll = () => {
+      updateExclusionZones();
+    };
+
     window.addEventListener('resize', handleResize);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    // Initial update + periodic sync for layout/font stabilization
+    updateExclusionZones();
+    const syncInterval = setInterval(updateExclusionZones, 400);
 
     // Rocket Boost state
     let isBoosting = false;
@@ -91,7 +197,7 @@ export const FloatingLettersCanvas: React.FC = () => {
       speedAlpha: (Math.random() * 0.01 + 0.003) * (Math.random() > 0.5 ? 1 : -1),
     }));
 
-    // 2. High-Tech Floating Skills & Glyphs with Anti-Cluster Spacing
+    // 2. High-Tech Floating Skills & Glyphs
     const SKILLS_LIST = [
       'DJANGO', 'PYTHON', 'POSTGRESQL', 'REDIS',
       'CELERY', 'AWS', 'DOCKER', 'TERRAFORM',
@@ -107,33 +213,73 @@ export const FloatingLettersCanvas: React.FC = () => {
       { color: '#FCD34D', glow: 'rgba(252, 211, 77, 0.45)' }, // Gold
     ];
 
-    // Distribute skills across screen sectors to prevent any clustering on spawn
-    const cols = 5;
-    const rows = 4;
-    const colWidth = width / cols;
-    const rowHeight = height / rows;
+    // Spawn along clear peripheral cosmic lanes
+    const getSafePeripheralSpawn = (index: number) => {
+      const lane = index % 5;
+      let sx = 0;
+      let sy = 0;
+
+      switch (lane) {
+        case 0:
+          // Left outer margin stream
+          sx = 20 + Math.random() * (Math.max(45, width * 0.08));
+          sy = 120 + Math.random() * (height - 200);
+          break;
+        case 1:
+          // Right outer margin stream (past portrait card)
+          sx = width - (25 + Math.random() * (Math.max(45, width * 0.09)));
+          sy = 110 + Math.random() * (height - 190);
+          break;
+        case 2:
+          // Mid-corridor space (between left text block and right portrait)
+          sx = width * 0.54 + (Math.random() - 0.5) * (width * 0.08);
+          sy = 140 + Math.random() * (height - 250);
+          break;
+        case 3:
+          // Bottom orbital stream
+          sx = 60 + Math.random() * (width - 120);
+          sy = height - (65 + Math.random() * 65);
+          break;
+        case 4:
+        default:
+          // Lower-mid atmospheric space
+          sx = width * 0.35 + (Math.random() - 0.5) * (width * 0.15);
+          sy = height - (140 + Math.random() * 80);
+          break;
+      }
+
+      return { sx, sy };
+    };
 
     const floatingItems: FloatingSkill[] = SKILLS_LIST.map((name, i) => {
       const palette = PALETTES[i % PALETTES.length];
       const isGlyph = ['✦', '✧', '◈', '🪐'].includes(name);
-      const col = i % cols;
-      const row = Math.floor(i / cols) % rows;
+      const { sx, sy } = getSafePeripheralSpawn(i);
+
+      // Lively, noticeable movement speed: 1.2 to 2.0 px/frame
+      const baseSpeed = 1.2 + Math.random() * 0.8;
+      const angle = (i * ((Math.PI * 2) / SKILLS_LIST.length)) + (Math.random() * 0.5 - 0.25);
 
       return {
         name,
         type: isGlyph ? 'glyph' : 'tech',
-        x: col * colWidth + Math.random() * (colWidth * 0.7) + 30,
-        y: row * rowHeight + Math.random() * (rowHeight * 0.7) + 40,
-        vx: (Math.random() - 0.5) * 0.35,
-        vy: (Math.random() - 0.5) * 0.35 - 0.06,
+        x: sx,
+        y: sy,
+        vx: Math.cos(angle) * baseSpeed,
+        vy: Math.sin(angle) * baseSpeed,
+        baseSpeed,
+        wobbleSpeed: 0.002 + Math.random() * 0.0015,
+        wobbleAmp: 0.4 + Math.random() * 0.3,
+        phase: Math.random() * Math.PI * 2,
         color: palette.color,
         glow: palette.glow,
-        size: isGlyph ? 18 : 11,
+        size: isGlyph ? 16 : 10.5,
       };
     });
 
     const render = () => {
       ctx.clearRect(0, 0, width, height);
+      const time = performance.now();
 
       // Smooth boost intensity transition
       if (isBoosting) {
@@ -184,7 +330,7 @@ export const FloatingLettersCanvas: React.FC = () => {
         for (let p = 0; p < 4; p++) {
           const pColors = ['#FF4500', '#FFA500', '#FFD700', '#00F0FF', '#FFFFFF'];
           particles.push({
-            x: width * 0.85 + (Math.random() - 0.5) * 30, // Positioned near rocket
+            x: width * 0.85 + (Math.random() - 0.5) * 30,
             y: height - 60 + Math.random() * 20,
             vx: (Math.random() - 0.5) * 4,
             vy: Math.random() * 12 + 6,
@@ -221,39 +367,16 @@ export const FloatingLettersCanvas: React.FC = () => {
         ctx.restore();
       }
 
-      // 3. Anti-Clustering Physics for Floating Skills
-      for (let i = 0; i < floatingItems.length; i++) {
-        for (let j = i + 1; j < floatingItems.length; j++) {
-          const itemA = floatingItems[i];
-          const itemB = floatingItems[j];
-          const dx = itemB.x - itemA.x;
-          const dy = itemB.y - itemA.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          const minSafeDist = 130; // Minimum distance to prevent clustering!
-
-          if (dist < minSafeDist && dist > 0) {
-            // Smooth repulsion push
-            const overlap = (minSafeDist - dist) / minSafeDist;
-            const pushX = (dx / dist) * overlap * 0.4;
-            const pushY = (dy / dist) * overlap * 0.4;
-            itemA.x -= pushX;
-            itemA.y -= pushY;
-            itemB.x += pushX;
-            itemB.y += pushY;
-          }
-        }
-      }
-
-      // 4. Interactive Constellation Lines (Connects cursor to nearby skills)
+      // 3. Interactive Constellation Lines (Connects cursor to nearby skills)
       if (isMouseOver && boostIntensity < 0.2) {
         floatingItems.forEach((item) => {
           const dx = mouseX - item.x;
           const dy = mouseY - item.y;
           const dist = Math.sqrt(dx * dx + dy * dy);
 
-          if (dist < 180) {
+          if (dist < 160) {
             ctx.save();
-            ctx.strokeStyle = `rgba(0, 240, 255, ${0.35 * (1 - dist / 180)})`;
+            ctx.strokeStyle = `rgba(0, 240, 255, ${0.35 * (1 - dist / 160)})`;
             ctx.lineWidth = 1;
             ctx.setLineDash([3, 4]);
             ctx.beginPath();
@@ -265,14 +388,16 @@ export const FloatingLettersCanvas: React.FC = () => {
         });
       }
 
-      // 5. Draw Floating Skills with Clean Futuristic Capsules
+      // 4. Update Floating Skills: Lively Motion + Strict Zero-Text-Overlap Repulsion
       floatingItems.forEach((item) => {
-        // Accelerate downwards if rocket is blasting off
+        // Continuous fluid drift + celestial sinusoidal wave float
         if (boostIntensity > 0.05) {
-          item.y += 4 + boostIntensity * 16;
+          item.y += 7 + boostIntensity * 22;
         } else {
-          item.x += item.vx;
-          item.y += item.vy;
+          const waveX = Math.cos(time * item.wobbleSpeed + item.phase) * item.wobbleAmp;
+          const waveY = Math.sin(time * item.wobbleSpeed * 1.1 + item.phase) * item.wobbleAmp;
+          item.x += item.vx + waveX;
+          item.y += item.vy + waveY;
         }
 
         // Mouse Gravitational Deflection
@@ -280,19 +405,114 @@ export const FloatingLettersCanvas: React.FC = () => {
           const dx = item.x - mouseX;
           const dy = item.y - mouseY;
           const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 140) {
-            const force = (140 - dist) / 140;
-            item.x += (dx / dist) * force * 1.8;
-            item.y += (dy / dist) * force * 1.8;
+          if (dist < 150 && dist > 0) {
+            const force = (150 - dist) / 150;
+            item.vx += (dx / dist) * force * 1.3;
+            item.vy += (dy / dist) * force * 1.3;
           }
         }
 
-        // Boundary wrap
-        if (item.x < -80) item.x = width + 80;
-        if (item.x > width + 80) item.x = -80;
-        if (item.y < -50) item.y = height + 50;
-        if (item.y > height + 50) item.y = -50;
+        // TEXT EXCLUSION ZONES AVOIDANCE (Guarantees skills never overlap text)
+        for (let z = 0; z < exclusionZones.length; z++) {
+          const zone = exclusionZones[z];
+          const dx = item.x - zone.cx;
+          const dy = item.y - zone.cy;
+          const absX = Math.abs(dx);
+          const absY = Math.abs(dy);
 
+          // Buffer where repulsion smoothly steers skill away from text
+          const steerBuffer = 70;
+          if (absX < zone.hw + steerBuffer && absY < zone.hh + steerBuffer) {
+            const penX = zone.hw + steerBuffer - absX;
+            const penY = zone.hh + steerBuffer - absY;
+            const dirX = dx >= 0 ? 1 : -1;
+            const dirY = dy >= 0 ? 1 : -1;
+
+            const steerStrength = 2.0;
+            if (penX < penY) {
+              item.vx += dirX * steerStrength * (penX / steerBuffer);
+            } else {
+              item.vy += dirY * steerStrength * (penY / steerBuffer);
+            }
+
+            // Hard boundary check: strictly eject if penetrated inside text box
+            if (absX < zone.hw && absY < zone.hh) {
+              const overlapX = zone.hw - absX;
+              const overlapY = zone.hh - absY;
+              if (overlapX < overlapY) {
+                item.x = zone.cx + dirX * (zone.hw + 10);
+                item.vx = dirX * Math.max(Math.abs(item.vx), item.baseSpeed * 1.4);
+              } else {
+                item.y = zone.cy + dirY * (zone.hh + 10);
+                item.vy = dirY * Math.max(Math.abs(item.vy), item.baseSpeed * 1.4);
+              }
+            }
+          }
+        }
+
+        // Speed Normalization: Keep them moving noticeably & gracefully
+        const currentSpeed = Math.hypot(item.vx, item.vy);
+        if (currentSpeed < 1.0) {
+          // Never let skills stall or freeze in place
+          const norm = currentSpeed || 1;
+          item.vx = (item.vx / norm) * item.baseSpeed;
+          item.vy = (item.vy / norm) * item.baseSpeed;
+        } else if (currentSpeed > 3.2) {
+          // Cap excessive velocity
+          item.vx = (item.vx / currentSpeed) * 3.2;
+          item.vy = (item.vy / currentSpeed) * 3.2;
+        }
+
+        // Gentle friction on high speed impulses
+        if (currentSpeed > item.baseSpeed) {
+          item.vx *= 0.99;
+          item.vy *= 0.99;
+        }
+
+        // Smooth Screen Boundary Wrap
+        if (item.x < -70) {
+          item.x = width + 50;
+        } else if (item.x > width + 70) {
+          item.x = -50;
+        }
+        if (item.y < -40) {
+          item.y = height + 30;
+        } else if (item.y > height + 40) {
+          item.y = -30;
+        }
+      });
+
+      // 5. Anti-Clustering Physics (Run AFTER movement to prevent skills from stacking on each other)
+      for (let i = 0; i < floatingItems.length; i++) {
+        for (let j = i + 1; j < floatingItems.length; j++) {
+          const itemA = floatingItems[i];
+          const itemB = floatingItems[j];
+          let dx = itemB.x - itemA.x;
+          let dy = itemB.y - itemA.y;
+          let dist = Math.hypot(dx, dy);
+          const minSafeDist = 120; // Minimum distance to prevent skills from grouping
+
+          if (dist < 4) {
+            // Overlapping in the same point: forcefully separate them
+            dx = (Math.random() - 0.5) * 2 || 1;
+            dy = (Math.random() - 0.5) * 2 || 1;
+            dist = Math.hypot(dx, dy);
+          }
+
+          if (dist < minSafeDist) {
+            const overlap = (minSafeDist - dist) / minSafeDist;
+            const pushX = (dx / dist) * overlap * 1.2;
+            const pushY = (dy / dist) * overlap * 1.2;
+            itemA.x -= pushX;
+            itemA.y -= pushY;
+            itemB.x += pushX;
+            itemB.y += pushY;
+          }
+        }
+      }
+
+      // 6. Draw Floating Skills with Clean Futuristic Capsules
+      floatingItems.forEach((item) => {
         ctx.save();
 
         if (item.type === 'glyph') {
@@ -300,45 +520,59 @@ export const FloatingLettersCanvas: React.FC = () => {
           ctx.font = `${item.size}px "Playfair Display", serif`;
           ctx.fillStyle = item.color;
           ctx.shadowColor = item.glow;
-          ctx.shadowBlur = 10;
-          ctx.globalAlpha = 0.6 + boostIntensity * 0.3;
+          ctx.shadowBlur = 12;
+          ctx.globalAlpha = 0.65 + boostIntensity * 0.3;
           ctx.fillText(item.name, item.x, item.y);
         } else {
           // Render Clean Orbital Tech Capsule Pill
           ctx.font = `600 ${item.size}px "JetBrains Mono", monospace`;
           const textMetrics = ctx.measureText(item.name);
           const textWidth = textMetrics.width;
-          const padX = 10;
-          const padY = 5;
-          const capsuleW = textWidth + padX * 2;
+          const padX = 9;
+          const padY = 4.5;
+          const capsuleW = textWidth + padX * 2 + 8;
           const capsuleH = item.size + padY * 2;
           const rx = item.x - capsuleW / 2;
           const ry = item.y - capsuleH / 2;
 
-          // Capsule background
-          ctx.fillStyle = 'rgba(7, 10, 18, 0.65)';
+          // Proximity fade: if approaching any text zone, soften alpha to avoid visual competition
+          let proximityAlpha = 1;
+          for (let z = 0; z < exclusionZones.length; z++) {
+            const zone = exclusionZones[z];
+            const dist = Math.hypot(item.x - zone.cx, item.y - zone.cy);
+            const safeR = Math.max(zone.hw, zone.hh) + 70;
+            if (dist < safeR) {
+              const factor = (dist - Math.max(zone.hw, zone.hh)) / 70;
+              proximityAlpha = Math.min(proximityAlpha, Math.max(0.15, factor));
+            }
+          }
+
+          // Subtle background pill
+          ctx.fillStyle = 'rgba(6, 9, 18, 0.72)';
           ctx.strokeStyle = item.color;
           ctx.lineWidth = 1;
           ctx.shadowColor = item.glow;
           ctx.shadowBlur = 8;
-          ctx.globalAlpha = 0.75 + boostIntensity * 0.2;
+          ctx.globalAlpha = (0.75 + boostIntensity * 0.25) * proximityAlpha;
 
-          // Draw rounded capsule
+          // Rounded capsule pill
           ctx.beginPath();
           ctx.roundRect(rx, ry, capsuleW, capsuleH, 6);
           ctx.fill();
           ctx.stroke();
 
-          // Capsule dot
+          // Capsule glowing status dot
           ctx.beginPath();
-          ctx.arc(rx + 7, ry + capsuleH / 2, 2, 0, Math.PI * 2);
+          ctx.arc(rx + 8, ry + capsuleH / 2, 2.2, 0, Math.PI * 2);
           ctx.fillStyle = item.color;
+          ctx.shadowColor = item.glow;
+          ctx.shadowBlur = 6;
           ctx.fill();
 
           // Capsule text
           ctx.fillStyle = '#FFFFFF';
-          ctx.shadowBlur = 4;
-          ctx.fillText(item.name, rx + 14, ry + capsuleH / 2 + item.size / 3);
+          ctx.shadowBlur = 3;
+          ctx.fillText(item.name, rx + 16, ry + capsuleH / 2 + item.size / 3);
         }
 
         ctx.restore();
@@ -350,7 +584,9 @@ export const FloatingLettersCanvas: React.FC = () => {
     render();
 
     return () => {
+      clearInterval(syncInterval);
       window.removeEventListener('resize', handleResize);
+      window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseleave', handleMouseLeave);
       window.removeEventListener('rocket-boost', handleRocketBoost);
@@ -366,3 +602,4 @@ export const FloatingLettersCanvas: React.FC = () => {
     />
   );
 };
+export default FloatingLettersCanvas;

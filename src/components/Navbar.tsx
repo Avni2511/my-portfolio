@@ -30,6 +30,7 @@ export const Navbar: React.FC<NavbarProps> = () => {
   return (
     <>
       <header
+        data-floating-avoid="true"
         className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
           scrolled
             ? 'py-3.5 backdrop-blur-xl bg-[#040508]/85 border-b border-white/10 shadow-lg'
